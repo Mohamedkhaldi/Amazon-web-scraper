@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+          background-color: #f8f9fa; /* Light grey background */
+      }
+        .container {
+            margin-top: 50px;
+            max-width: 600px;
+             background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+         h2 {
+            color: #343a40; /* Dark grey text for headers */
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group label {
+          color: #495057; /* Slightly darker grey for labels */
+            font-weight: bold;
+        }
+        .form-control {
+          border-color: #ced4da; /* Light grey border for form controls */
+          box-shadow: none !important; /* Remove the default box-shadow */
+         }
+         .form-control:focus {
+           border-color: #007bff; /* Blue border when focused */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Blue button */
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+             background-color: #0056b3;
+              border-color: #0056b3;
+        }
+        .btn-primary:focus, .btn-primary:active {
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.5); /* Add a light blue focus ring*/
+        }
+        a.back-to-register {
+           display: block; /* Make the link a block-level element */
+        text-align: center; /* Center the link */
+        margin-top: 20px; /* Add space above the link */
+          color: #007bff; /* Link color */
+        text-decoration: none; /* Remove underline from the link */
+       }
+
+       a.back-to-register:hover {
+           text-decoration: underline; /* Add underline on hover */
+           color: #0056b3; /* Darker color on hover */
+       }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                         {{ message }}
+                   </div>
+                 {% endfor %}
+            {% endif %}
+         {% endwith %}
+        <form method="post">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" class="form-control" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" name="password" required>
+            </div>
+             <button type="submit" class="btn btn-primary">Login</button>
+
+        </form>
+         <a href="{{ url_for('register') }}" class="back-to-register">Don't have an account ? Register</a>
+    </div>
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

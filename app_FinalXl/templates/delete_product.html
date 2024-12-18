@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Product</title>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <style>
+        body {
+          background-color: #f8f9fa; /* Light grey background */
+      }
+        .container {
+            margin-top: 50px;
+            max-width: 600px;
+             background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+         h2 {
+            color: #343a40; /* Dark grey text for headers */
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group label {
+          color: #495057; /* Slightly darker grey for labels */
+            font-weight: bold;
+        }
+        .form-control {
+          border-color: #ced4da; /* Light grey border for form controls */
+          box-shadow: none !important; /* Remove the default box-shadow */
+         }
+         .form-control:focus {
+           border-color: #007bff; /* Blue border when focused */
+        }
+        .btn-danger {
+            background-color: #dc3545;
+             border-color: #dc3545;
+        }
+
+          .btn-danger:hover {
+               background-color: #c82333;
+                 border-color: #c82333;
+         }
+          .btn-danger:focus, .btn-danger:active{
+               box-shadow: 0 0 0 0.2rem rgba(220,53,69,.5);
+
+           }
+       a.back-to-admin {
+           display: block; /* Make the link a block-level element */
+        text-align: center; /* Center the link */
+        margin-top: 20px; /* Add space above the link */
+          color: #007bff; /* Link color */
+        text-decoration: none; /* Remove underline from the link */
+       }
+
+       a.back-to-admin:hover {
+           text-decoration: underline; /* Add underline on hover */
+           color: #0056b3; /* Darker color on hover */
+       }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Delete Product</h2>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                         {{ message }}
+                   </div>
+                 {% endfor %}
+            {% endif %}
+         {% endwith %}
+        <form method="post">
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" class="form-control" name="category" required>
+            </div>
+             <div class="form-group">
+                 <label for="product_id">Product ID:</label>
+                 <input type="text" class="form-control" name="product_id" required>
+            </div>
+              <button type="submit" class="btn btn-danger">Delete Product</button>
+        </form>
+          <a href="{{ url_for('admin') }}" class="back-to-admin">Back to Admin Panel</a>
+    </div>
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

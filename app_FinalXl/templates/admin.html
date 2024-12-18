@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+         body {
+           background-color: #f8f9fa;
+       }
+         h2 {
+            color: #343a40;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+         .container {
+             margin-top: 50px;
+             max-width: 1200px;
+             background-color: white;
+             padding: 20px;
+             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+         }
+       .admin-link {
+            margin-bottom: 15px; /* Space between buttons */
+        }
+
+        .btn-admin {
+              background-color: #28a745; /* Green for buttons */
+            border-color: #28a745;
+           color: #ffffff;
+            display: block; /* Make it a block element */
+            text-align: center; /* Center text */
+            padding: 10px; /* Add space around the text */
+            text-decoration: none; /* Remove default underline */
+            border-radius: 5px; /* Add rounded edges */
+
+        }
+
+       .btn-admin:hover {
+           background-color: #1e7e34; /* Darker green on hover */
+           border-color: #1e7e34;
+
+        }
+
+         .btn-admin:focus, .btn-admin:active {
+               box-shadow: 0 0 0 0.2rem rgba(40,167,69,.5); /* Green focus outline */
+        }
+        a.back-to-home {
+            display: block; /* Make the link a block-level element */
+            text-align: center; /* Center the link */
+             margin-top: 20px; /* Add space above the link */
+            color: #007bff; /* Link color */
+           text-decoration: none; /* Remove underline from the link */
+       }
+
+       a.back-to-home:hover {
+           text-decoration: underline; /* Add underline on hover */
+             color: #0056b3; /* Darker color on hover */
+       }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Panel</h2>
+       {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="admin-link">
+              <a href="{{ url_for('add_product') }}" class="btn btn-admin">Add New Product</a>
+        </div>
+        <div class="admin-link">
+             <a href="{{ url_for('delete_product') }}" class="btn btn-admin">Delete Product</a>
+        </div>
+         <a href="{{ url_for('index') }}" class="back-to-home">Back to Home</a>
+    </div>
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shopping Cart</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+       body {
+         background-color: #f8f9fa;
+     }
+       h2 {
+          color: #343a40;
+          text-align: center;
+          margin-bottom: 30px;
+      }
+      .container {
+           margin-top: 50px;
+           max-width: 1200px;
+           background-color: white;
+           padding: 20px;
+           border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          display: flex; /* Enable flexbox layout */
+       }
+     .sidebar {
+          width: 250px; /* Set the width of the sidebar */
+          background-color: #343a40; /* Dark background for the sidebar */
+          padding: 20px; /* Add some space inside the sidebar */
+          color: #ffffff; /* White text for the sidebar */
+         border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+      }
+     .content {
+          flex: 1; /* Allow content to expand and take the rest of the space */
+          padding: 20px;
+       }
+      .sidebar h4 {
+          color: #ffffff; /* White text for the sidebar heading */
+          margin-bottom: 20px;
+           text-align: center;
+      }
+      .sidebar a {
+         color: #ffffff; /* White text for the sidebar link */
+         display: block;
+         padding: 8px 12px;
+         text-decoration: none;
+         border-radius: 5px;
+         margin-bottom: 5px;
+       }
+      .sidebar a:hover {
+           background-color: #495057;
+       }
+      .cart-item {
+          border: 1px solid #ced4da;
+          margin-bottom: 20px;
+           padding: 15px;
+         border-radius: 8px;
+          background-color: #f8f9fa;
+       }
+      .cart-item-image{
+           max-width: 100px;
+           height: auto;
+        }
+       .cart-item-title{
+          font-weight: bold;
+           color: #343a40; /* Dark grey for titles */
+           margin-bottom: 10px; /* Space below title */
+      }
+      .cart-item-info{
+         margin-bottom: 5px;
+       }
+      .cart-item-price {
+        font-weight: bold; /* Make prices stand out */
+         color: #28a745; /* Green for prices */
+        margin-bottom: 10px; /* Space below price */
+
+      }
+     .btn-danger {
+           background-color: #dc3545;
+           border-color: #dc3545;
+       }
+
+        .btn-danger:hover {
+             background-color: #c82333;
+               border-color: #c82333;
+       }
+        .btn-danger:focus, .btn-danger:active{
+             box-shadow: 0 0 0 0.2rem rgba(220,53,69,.5);
+
+         }
+     .btn-success {
+          background-color: #28a745;
+           border-color: #28a745;
+       }
+
+        .btn-success:hover {
+             background-color: #1e7e34;
+               border-color: #1e7e34;
+       }
+        .btn-success:focus, .btn-success:active{
+             box-shadow: 0 0 0 0.2rem rgba(40,167,69,.5);
+
+         }
+  </style>
+</head>
+<body>
+  <div class="container">
+      <div class="sidebar">
+          <h4>Navigation</h4>
+               <a href="{{ url_for('index')}}">Home</a>
+              <a href="{{ url_for('panier')}}">Cart</a>
+             {% if current_user.is_authenticated %}
+                  <a href="{{ url_for('logout') }}">Logout</a>
+                    {% if current_user.is_admin %}
+                       <a href="{{ url_for('admin') }}">Admin Panel</a>
+                   {% endif %}
+              {% else %}
+                   <a href="{{ url_for('login')}}">Sign In</a>
+                  <a href="{{ url_for('register')}}">Register</a>
+              {% endif %}
+       </div>
+       <div class="content">
+         <h2>Shopping Cart</h2>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                  {% for category, message in messages %}
+                      <div class="alert alert-{{ category }}">
+                           {{ message }}
+                     </div>
+                   {% endfor %}
+              {% endif %}
+          {% endwith %}
+            {% if cart_items %}
+              {% for item in cart_items %}
+                   <div class="cart-item">
+                        <div class="row align-items-center">
+                           <div class="col-md-2">
+                                <img src="{{ item['Image URL'] }}" alt="{{ item['Title'] }}" class="img-fluid cart-item-image">
+                              </div>
+                           <div class="col-md-10">
+                              <h4 class="cart-item-title">{{ item['Title'] }}</h4>
+                              <div class="cart-item-info">
+                                  <p><strong>Description:</strong> {{ item['Description'] }}</p>
+                                   <p><strong>Rating:</strong> {{ item['Rating'] }}</p>
+                                   <p><strong>Review count:</strong> {{ item['Review Count'] }}</p>
+                                     <p><strong>Sold:</strong> {{ item['Sold'] }}</p>
+                                 <p class="cart-item-price"><strong>Price:</strong> {{ item['Price'] }}</p>
+
+                              </div>
+                               <a href="{{ url_for('remove_from_cart', index=loop.index0) }}" class="btn btn-danger">Remove</a>
+                            </div>
+                        </div>
+                   </div>
+              {% endfor %}
+               <form method="post" action="{{ url_for('confirm_cart') }}">
+                      <button type="submit" class="btn btn-success">Confirm Order</button>
+               </form>
+           {% else %}
+              <p>Your cart is empty.</p>
+           {% endif %}
+           <a href="{{ url_for('products', category=session.get('last_category', '')) }}" class="back-to-home">Continue Shopping</a>
+       </div>
+
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
