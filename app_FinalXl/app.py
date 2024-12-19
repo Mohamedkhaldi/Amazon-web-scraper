@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from bson import ObjectId # Import ObjectId
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -21,16 +22,33 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login' # Set the login view function
 
-# Helper function to convert ObjectId to strings
-def convert_object_ids_to_strings(obj):
-    if isinstance(obj, dict):
-        return {key: convert_object_ids_to_strings(value) for key, value in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_object_ids_to_strings(item) for item in obj]
-    elif isinstance(obj, ObjectId):
+def convertir_en_chaines(obj):
+    """Convertit récursivement les ObjectId en chaînes de caractères."""
+    if isinstance(obj, ObjectId):
         return str(obj)
-    return obj
+    elif isinstance(obj, dict):
+        return {k: convertir_en_chaines(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convertir_en_chaines(item) for item in obj]
+    else:
+        return obj
 
+
+def restaurer_object_ids(obj):
+    """Convertit récursivement les chaînes de caractères en ObjectId."""
+    if isinstance(obj, str):
+        try:
+            return ObjectId(obj)
+        except:
+            return obj
+    elif isinstance(obj, dict):
+        return {k: restaurer_object_ids(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [restaurer_object_ids(item) for item in obj]
+    else:
+        return obj
+
+    
 class User(UserMixin):
     def __init__(self, id, username, password, is_admin):
         self.id = id
@@ -369,22 +387,7 @@ def add_to_cart():
         if selected_product:
             # Convert ObjectId to string before storing in session
 
-            def convert_object_ids_to_strings(obj):
-                if isinstance(obj, dict):
-                    for key, value in obj.items():
-                        obj[key] = convert_object_ids_to_strings(value)
-                    return obj
-
-                elif isinstance(obj, list):
-                    return [convert_object_ids_to_strings(item) for item in obj]
-
-                elif isinstance(obj, ObjectId):
-                    return str(obj)
-
-                else:
-                    return obj
-
-            selected_product = convert_object_ids_to_strings(selected_product)
+            selected_product = convertir_en_chaines(selected_product)
 
             if current_user.is_authenticated:
                 user_id = str(current_user.id)
@@ -405,35 +408,27 @@ def add_to_cart():
 
     return "Product not found"
 
+def convert_object_ids_to_strings(data): # Nouvelle fonction pour convertir récursivement les ObjectId
+    if isinstance(data, list):
+        return [convert_object_ids_to_strings(item) for item in data]
+    elif isinstance(data, dict):
+        return {k: convert_object_ids_to_strings(v) for k, v in data.items()}
+    elif isinstance(data, ObjectId):
+        return str(data)
+    return data
+
 @app.route('/panier')
 def panier():
-   
+    cart_items = []
     if current_user.is_authenticated:
         user_id = str(current_user.id)
         cart_items = session.get('carts', {}).get(user_id, [])
     else:
-        cart_items=session.get('anonymous_cart', [])
+        cart_items = session.get('anonymous_cart', [])
 
-    # Restore ObjectId for display purposes if needed
-    def restore_object_ids(obj):
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                obj[key] = restore_object_ids(value)
-            return obj
-
-        elif isinstance(obj, list):
-            return [restore_object_ids(item) for item in obj]
-
-        elif isinstance(obj, str): # Check if it's a string
-             try:
-                 return ObjectId(obj)
-             except:
-                return obj
-        else:
-            return obj
-
-    cart_items = restore_object_ids(cart_items) #convert the ids back to object id
+    cart_items = convert_object_ids_to_strings(cart_items) # Conversion AVANT envoi au template
     return render_template('panier.html', cart_items=cart_items)
+
 # Route to remove an item from the cart
 @app.route('/remove_from_cart/<int:index>')
 def remove_from_cart(index):
@@ -466,14 +461,47 @@ def remove_from_cart(index):
     # Redirect to the cart page
     return redirect(url_for('panier'))
 @app.route('/confirm_cart', methods=['POST'])
-@login_required  # Require login before confirming the order
+@login_required
 def confirm_cart():
-     if current_user.is_authenticated:
-            user_id= str(current_user.id)
-            if 'carts' in session and user_id in session['carts']:
-                del session['carts'][user_id]
-            flash('Your order has been confirmed', 'success')
-     return redirect(url_for('index')) #back to home
+    if current_user.is_authenticated:
+        user_id = str(current_user.id)
+        if 'carts' in session and user_id in session['carts']:
+            cart_items = session['carts'][user_id]
+
+            try:
+                client = MongoClient('mongodb://localhost:27017/')
+                db = client['product_db']
+                users_collection = db['users']
+
+                # Convertir les ObjectId en chaînes avant l'enregistrement
+                cart_items_str = convert_object_ids_to_strings(cart_items)
+
+                # Créer l'objet de la commande
+                order = {
+                    'user_id': ObjectId(user_id),  # enregistrer l'ObjectId de l'utilisateur
+                    'items': cart_items_str,
+                    'order_date': datetime.now(),
+                    'status': 'Confirmed'  # Vous pouvez ajouter d'autres statuts comme 'Processing', 'Shipped', etc.
+                }
+
+                # Mettre à jour l'utilisateur avec la nouvelle commande dans un tableau 'orders'
+                users_collection.update_one(
+                    {'_id': ObjectId(user_id)},
+                    {'$push': {'orders': order}}
+                )
+
+                del session['carts'][user_id] #vider le panier apres la confirmation
+
+                flash('Your order has been confirmed', 'success')
+                return redirect(url_for('index'))  # Retourner à l'accueil après la confirmation
+            except Exception as e:
+                flash(f'Error confirming order: {e}', 'danger')
+                return redirect(url_for('panier'))
+            finally:
+                if client:
+                    client.close()
+
+    return redirect(url_for('panier')) # Gérer le cas où l'utilisateur n'est pas connecté ou n'a pas de panier.
 
 @app.route('/admin')
 @login_required

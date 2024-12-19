@@ -96,49 +96,31 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="logo-container">
-               <img src="{{ url_for('static', filename='logo.png')}}" alt="Logo" class="logo">
-            </div>
-            <h4>Navigation</h4>
-               <a href="{{ url_for('index')}}">Home</a>
-                <a href="{{ url_for('panier')}}">Cart</a>
-               {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('logout') }}">Logout</a>
-                      {% if current_user.is_admin %}
-                         <a href="{{ url_for('admin') }}">Admin Panel</a>
-                     {% endif %}
-                {% else %}
-                     <a href="{{ url_for('login')}}">Sign In</a>
-                    <a href="{{ url_for('register')}}">Register</a>
-                {% endif %}
+    {% extends "base.html" %}
+
+    {% block title %}Product Search{% endblock %}
+    
+    {% block content %}
+        <div class="home-image-container">
+            <img src="{{ url_for('static', filename='Amazon scrap.jpg')}}" alt="Home image" class="home-image">
         </div>
-        <div class="content">
-            <div class="home-image-container">
-                 <img src="{{ url_for('static', filename='home_image.png')}}" alt="Home image" class="home-image">
+        <h2>Search for Products</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="post">
+            <div class="form-group">
+                <label for="category">Product/Category:</label>
+                <input type="text" class="form-control" name="category" required>
             </div>
-            <h2>Search for Products</h2>
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                             {{ message }}
-                       </div>
-                     {% endfor %}
-                {% endif %}
-            {% endwith %}
-            <form method="post">
-                <div class="form-group">
-                    <label for="category">Product/Category:</label>
-                    <input type="text" class="form-control" name="category" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
-    </div>
-      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    {% endblock %}
 </body>
 </html>
